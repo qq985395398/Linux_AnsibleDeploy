@@ -1,0 +1,1 @@
+基于Ansible程序的部署文件，可以为受控节点安装LNMP（Linux、Nginx、Mysql、PHP）框架，并内置了WordPress，一键为受控节点的机器安装可实际使用的网页web端服务器组件，随时让服务器化为网页服务器。
