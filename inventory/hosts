@@ -1,0 +1,11 @@
+# 本地测试用主机清单（所有节点都指向本机）
+[web_servers]
+web ansible_host=127.0.0.1 ansible_user=root ansible_connection=local  # 本地模拟 web
+
+[db_servers]
+db ansible_host=127.0.0.1 ansible_user=root ansible_connection=local  # 本地模拟 db
+
+# 可选：指定 Python 解释器（避免本地 Python 版本问题）
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_connection=local

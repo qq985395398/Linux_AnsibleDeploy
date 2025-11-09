@@ -1,0 +1,23 @@
+# Ubuntu专用MySQL配置（兼容mysql-server 8.0+）
+[mysqld]
+# Ubuntu默认数据目录和socket路径
+datadir = /var/lib/mysql
+socket = /var/run/mysqld/mysqld.sock
+pid-file = /var/run/mysqld/mysqld.pid
+
+# 基础配置（引用变量）
+port = {{ mysql_port }}
+character-set-server = {{ mysql_charset }}
+collation-server = {{ mysql_charset }}_general_ci
+
+# 动态内存配置（保留之前的逻辑）
+{% if ansible_memory_mb.real.total > 2048 %}
+max_connections = 100
+innodb_buffer_pool_size = 512M
+{% else %}
+max_connections = 50
+innodb_buffer_pool_size = 256M
+{% endif %}
+
+# Ubuntu MySQL默认日志配置（保留，避免冲突）
+log_error = /var/log/mysql/error.log

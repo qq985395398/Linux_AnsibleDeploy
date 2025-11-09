@@ -1,0 +1,25 @@
+---
+# vars file for roles/mysql
+mysql_root_pass: "Mysql@123"
+wp_db_pass: "Wp@123"
+
+#按系统区分安装包
+mysql_pkgs:
+  Debian:
+    - mysql-server
+    - mysql-client
+    - python3-pymysql 
+  RedHat:
+    - mariadb-server
+    - mariadb
+    - python3-PyMySQL
+
+mysql_cnf_directory:
+  Dibian: /etc/mysql/my.cnf
+  Ubuntu: /etc/mysql/my.cnf
+  RedHat: /etc/my.cnf
+  CentOS: /etc/my.cnf
+
+mysql_service:
+  Debian: mysql
+  RedHat: mariadb

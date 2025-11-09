@@ -1,0 +1,22 @@
+---
+- name: 部署Mysql数据库-只在db-server组执行
+  hosts: db_servers
+  become: yes
+  roles:
+    - mysql
+
+- name: 部署Nginx和PHP-只在web_servers组执行
+  hosts: web_servers
+  become: yes
+  roles:
+    - nginx
+    - php
+
+- name: 部署WordPress-只在web_servers组执行
+  hosts: web_servers
+  become: yes
+  vars:
+    db_host: "{{ groups['db_servers'][0] }}"
+  roles: 
+    - wordpress
+

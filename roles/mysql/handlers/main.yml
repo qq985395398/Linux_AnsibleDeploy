@@ -1,0 +1,12 @@
+---
+# handlers file for roles/mysql
+- name: restart mysql
+  service:
+    name: "{{ mysql_service[ansible_os_family] }}"
+    state: restarted
+
+- name: start mysql
+  service:
+    name: "{{ mysql_service[ansible_os_family] }}"
+    state: started
+    enabled: yes

@@ -1,0 +1,7 @@
+---
+# vars file for roles/wordpress
+wp_db_name: "wordpress"  # 数据库名称（需和MySQL任务中创建的一致）
+wp_db_user: "wp_user"     # WordPress数据库用户
+wp_db_pass: "Wp@123" # 数据库用户密码
+wp_db_host: "localhost"         # 数据库服务器地址（如果是同一台机器用localhost，不同机器填数据库节点IP）
+mysql_charset: "utf8mb4"

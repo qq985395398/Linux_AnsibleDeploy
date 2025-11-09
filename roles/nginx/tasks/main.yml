@@ -1,0 +1,44 @@
+---
+# tasks file for roles/nginx
+# 任务0：按系统类型设置Web服务用户（解决www-data不存在问题）
+- name: 设置Ubuntu的Web用户（www-data）
+  set_fact:
+    web_user: "www-data"
+    web_group: "www-data"
+  when: ansible_os_family == "Debian"
+
+- name: 设置CentOS的Web用户（nginx）
+  set_fact:
+    web_user: "nginx"
+    web_group: "nginx"
+  when: ansible_os_family == "RedHat"
+  
+# 任务1：安装Nginx
+- name: 安装Nginx
+  package:
+    name: nginx
+    state: present
+
+# 任务2：部署Nginx配置文件
+- name: 复制nginx.conf
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: 0644
+  notify: restart nginx
+
+# 任务3：启动Nginx服务
+- name: 确保Nginx启动并开机自启
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+# 任务4：创建WordPress目录（给Nginx访问）
+- name: 创建/var/www/wordpress目录
+  file:
+    path: /var/www/wordpress
+    state: directory
+    owner: "{{ web_user }}"  # Nginx运行用户
+    group: "{{ web_group }}"
+    mode: 0755

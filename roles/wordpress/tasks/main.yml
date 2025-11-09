@@ -1,0 +1,72 @@
+# tasks file for roles/wordpress
+- name: 设置Ubuntu的Web用户（www-data）
+  set_fact:
+    web_user: "www-data"
+    web_group: "www-data"
+  when: ansible_os_family == "Debian"
+
+- name: 设置CentOS的Web用户（nginx）
+  set_fact:
+    web_user: "nginx"
+    web_group: "nginx"
+  when: ansible_os_family == "RedHat"
+
+# 任务1: 下载WordPress
+- name: 下载WordPress
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/wordpress.tar.gz
+    mode: '0644'
+
+# 【核心修改：创建新目录/opt/wordpress（避开/var/www/）】
+- name: 创建/opt/wordpress目录（全新目录，无权限限制）
+  file:
+    path: /opt/wordpress
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0755'
+
+# 仅CentOS：调整新目录的SELinux上下文
+- name: 配置SELinux允许httpd访问/opt/wordpress
+  command: chcon -Rt httpd_sys_rw_content_t /opt/wordpress
+  when: ansible_os_family == "RedHat"
+
+# 任务2: 解压WordPress到新目录
+- name: 解压WordPress
+  unarchive:
+    src: /tmp/wordpress.tar.gz
+    dest: /opt/  # 解压到/opt/，会生成/opt/wordpress
+    remote_src: yes
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0755'
+
+# 任务3: 生成wp-config.php（路径改为新目录）
+- name: 生成WordPress配置文件
+  template:
+    src: wp-config.php.j2
+    dest: /opt/wordpress/wp-config.php  # 新路径
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0644'
+
+# 任务4: 递归修复新目录权限
+- name: 确保WordPress所有文件权限正确
+  file:
+    path: /opt/wordpress
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0755'
+    recurse: yes
+
+# 任务5: 修复上传目录权限
+- name: 确保WordPress上传目录可写
+  file:
+    path: /opt/wordpress/wp-content/uploads
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_group }}"
+    mode: '0775'
+    recurse: yes

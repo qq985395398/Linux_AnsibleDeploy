@@ -1,0 +1,6 @@
+---
+# vars file for roles/nginx
+php_fpm_directory:
+  Debian: /run/php/php7.4-fpm.sock
+  RedHat: /run/php-fpm/www.sock
+

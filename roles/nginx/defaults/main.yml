@@ -1,0 +1,6 @@
+---
+# defaults file for roles/nginx
+web_root: "/var/www/{{ project_name }}"
+domain_name: "localhost"
+nginx_worker_processes: "auto"
+nginx_port: 80

@@ -1,0 +1,88 @@
+---
+# tasks file for roles/mysql
+# 任务1:安装Mysql及依赖
+- name: 安装Mysql packages
+  package:
+    name: "{{ mysql_pkgs[ansible_os_family] }}"
+    state: present
+
+# 任务2:部署配置文件
+# 任务2：部署MySQL配置文件（按系统区分路径）
+- name: 部署Ubuntu的MySQL配置（mysqld.cnf）
+  template:
+    src: ubuntu.cnf.j2  # Ubuntu专用模板
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf  # Ubuntu正确路径
+    mode: 0644
+  notify: restart mysql
+  when: ansible_os_family == "Debian"  # 只在Ubuntu/Debian执行
+
+- name: 部署CentOS的MySQL配置（my.cnf）
+  template:
+    src: centos.cnf.j2  # CentOS专用模板
+    dest: /etc/my.cnf  # CentOS正确路径
+    mode: 0644
+  notify: restart mysql
+  when: ansible_os_family == "RedHat"  # 只在CentOS/RHEL执行
+
+# 任务3.1: 首次安装MariaDB初始化
+
+# 任务3:启动Mysql服务
+- name: 确保Mysql启动并开启自启
+  service:
+    name: "{{ mysql_service[ansible_os_family] }}"
+    state: started
+    enabled: yes
+
+# 任务4: 设置mysql的root密码
+# Ubuntu/Debian任务（确保路径正确）
+- name: 检查MySQL root密码是否已设置
+  shell: mysql -u root -p'{{ mysql_root_pass }}' -e "exit" 2>/dev/null
+  register: password_set
+  ignore_errors: yes
+
+- name: 设置MySQL root密码（Ubuntu）
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_pass }}"
+    host_all: yes  # 允许root从任何主机登录（测试用）
+    login_unix_socket: /var/run/mysqld/mysqld.sock  # 与实际socket路径一致
+  when: 
+    - ansible_os_family == "Debian"
+    - password_set.rc !=0
+  ignore_errors: yes
+  
+# CentOS/RHEL任务（确保路径正确）
+- name: 设置MariaDB root密码（CentOS）
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_pass }}"
+    host_all: yes  # 允许root从任何主机登录（测试用）
+    login_unix_socket: /var/lib/mysql/mysql.sock  # 与实际socket路径一致
+  when: 
+    - ansible_os_family == "RedHat"
+    - password_set.rc !=0
+  ignore_errors: yes
+  
+# 任务5: 创建WorkPress数据库
+- name: 创建WorkPress数据库
+  mysql_db:
+    name: "{{ wp_db_name }}"
+    encoding: "{{ mysql_charset }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_pass }}"
+
+# 任务6:创建WorkPress用户并授权
+- name: 创建WP数据库用户
+  mysql_user:
+    name: "{{ wp_db_user }}"
+    password: "{{ wp_db_pass }}"
+    priv: "{{ wp_db_name }}.*:ALL"
+      # 允许从任何主机连接-仅测试
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_pass }}"
+
+
+

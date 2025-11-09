@@ -1,0 +1,46 @@
+---
+# tasks file for roles/php
+# 定义PHP-FPM服务名
+- name: 设置PHP-FPM服务名
+  set_fact:
+    php_fpm_service: "php7.4-fpm"
+  when: ansible_os_family == "Debian"
+
+- name: 设置PHP-FPM服务名-CentOS
+  set_fact:
+    php_fpm_service: "php-fpm"
+  when: ansible_os_family == "RedHat"
+
+# 任务1：安装PHP及依赖（按系统区分包名）
+- name: 安装PHP及依赖（Ubuntu/Debian）
+  package:
+    name:
+      - php
+      - php-fpm
+      - php-mysql  # Ubuntu的MySQL扩展
+      - php-curl
+      - php-gd
+      - php-mbstring
+      - php-xml
+    state: present
+  when: ansible_os_family == "Debian"  # 只在Debian系执行
+
+- name: 安装PHP及依赖（CentOS/RHEL）
+  package:
+    name:
+      - php
+      - php-fpm
+      - php-mysqlnd  # CentOS的MySQL扩展（关键修正）
+      - php-curl
+      - php-gd
+      - php-mbstring
+      - php-xml
+    state: present
+  when: ansible_os_family == "RedHat"  # 只在RedHat系执行
+
+#任务2:启动PHP-FPM服务
+- name: 确保PHP-FPM启动并开机自启
+  service:
+    name: "{{ php_fpm_service }}"
+    state: started
+    enabled: yes

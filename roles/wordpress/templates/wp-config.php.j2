@@ -1,0 +1,24 @@
+<?php
+define( 'DB_NAME', '{{ wp_db_name }}' );
+define( 'DB_USER', '{{ wp_db_user }}' );
+define( 'DB_PASSWORD', '{{ wp_db_pass }}' );
+define( 'DB_HOST', '{{ wp_db_host }}' );  # MySQL主机IP
+define( 'DB_CHARSET', '{{ mysql_charset }}' );
+define( 'DB_COLLATE', '' );
+
+// 随机密钥（自动生成）
+define( 'AUTH_KEY',         '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'SECURE_AUTH_KEY',  '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'LOGGED_IN_KEY',    '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'NONCE_KEY',        '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'AUTH_SALT',        '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'SECURE_AUTH_SALT', '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'LOGGED_IN_SALT',   '{{ lookup("password", "/dev/null length=32") }}' );
+define( 'NONCE_SALT',       '{{ lookup("password", "/dev/null length=32") }}' );
+
+$table_prefix = 'wp_';
+define( 'WP_DEBUG', false );
+if ( !defined( 'ABSPATH' ) ) {
+    define( 'ABSPATH', __DIR__ . '/' );
+}
+require_once ABSPATH . 'wp-settings.php';
